@@ -190,6 +190,26 @@
             font-weight: bold;
         }
 
+        .phase-title {
+            font-size: 1.3em;
+            margin-bottom: 10px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .phase-image {
+            text-align: center;
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(255,255,255,0.5);
+            border-radius: 8px;
+        }
+
+        .phase-image svg {
+            max-width: 100%;
+            height: auto;
+        }
+
         .phase-items {
             min-height: 60px;
         }
@@ -408,27 +428,105 @@
                     <h2 class="column-title">Phases of Mitosis</h2>
 
                     <div class="phase-card" data-phase="prophase">
-                        <div class="phase-header">🌱 1. Prophase</div>
+                        <div class="phase-header">
+                            <div class="phase-title">🌱 1. Prophase</div>
+                            <div class="phase-image">
+                                <svg width="120" height="80" viewBox="0 0 120 80">
+                                    <circle cx="60" cy="40" r="35" fill="#e3f2fd" stroke="#2196F3" stroke-width="2"/>
+                                    <g stroke="#1976D2" stroke-width="2" fill="none">
+                                        <line x1="30" y1="25" x2="45" y2="30"/>
+                                        <line x1="30" y1="35" x2="45" y2="40"/>
+                                        <line x1="30" y1="45" x2="45" y2="50"/>
+                                        <line x1="30" y1="55" x2="45" y2="60"/>
+                                    </g>
+                                    <g stroke="#1976D2" stroke-width="2" fill="none">
+                                        <line x1="90" y1="25" x2="75" y2="30"/>
+                                        <line x1="90" y1="35" x2="75" y2="40"/>
+                                        <line x1="90" y1="45" x2="75" y2="50"/>
+                                        <line x1="90" y1="55" x2="75" y2="60"/>
+                                    </g>
+                                    <text x="60" y="70" text-anchor="middle" font-size="8" fill="#666">Chromosomes condensing</text>
+                                </svg>
+                            </div>
+                        </div>
                         <div class="phase-items" id="prophase-items"></div>
                     </div>
 
                     <div class="phase-card" data-phase="metaphase">
-                        <div class="phase-header">⚙️ 2. Metaphase</div>
+                        <div class="phase-header">
+                            <div class="phase-title">⚙️ 2. Metaphase</div>
+                            <div class="phase-image">
+                                <svg width="120" height="80" viewBox="0 0 120 80">
+                                    <circle cx="60" cy="40" r="35" fill="#e8f5e8" stroke="#4CAF50" stroke-width="2"/>
+                                    <g stroke="#2E7D32" stroke-width="2" fill="none">
+                                        <line x1="20" y1="40" x2="100" y2="40"/>
+                                        <line x1="35" y1="35" x2="35" y2="45"/>
+                                        <line x1="50" y1="35" x2="50" y2="45"/>
+                                        <line x1="70" y1="35" x2="70" y2="45"/>
+                                        <line x1="85" y1="35" x2="85" y2="45"/>
+                                    </g>
+                                    <text x="60" y="70" text-anchor="middle" font-size="8" fill="#666">Chromosomes aligned</text>
+                                </svg>
+                            </div>
+                        </div>
                         <div class="phase-items" id="metaphase-items"></div>
                     </div>
 
                     <div class="phase-card" data-phase="anaphase">
-                        <div class="phase-header">✂️ 3. Anaphase</div>
+                        <div class="phase-header">
+                            <div class="phase-title">✂️ 3. Anaphase</div>
+                            <div class="phase-image">
+                                <svg width="120" height="80" viewBox="0 0 120 80">
+                                    <circle cx="60" cy="40" r="35" fill="#fff3e0" stroke="#FF9800" stroke-width="2"/>
+                                    <g stroke="#F57C00" stroke-width="2" fill="none">
+                                        <line x1="20" y1="40" x2="100" y2="40"/>
+                                        <line x1="25" y1="30" x2="25" y2="50"/>
+                                        <line x1="35" y1="30" x2="35" y2="50"/>
+                                        <line x1="85" y1="30" x2="85" y2="50"/>
+                                        <line x1="95" y1="30" x2="95" y2="50"/>
+                                    </g>
+                                    <text x="60" y="70" text-anchor="middle" font-size="8" fill="#666">Chromatids separating</text>
+                                </svg>
+                            </div>
+                        </div>
                         <div class="phase-items" id="anaphase-items"></div>
                     </div>
 
                     <div class="phase-card" data-phase="telophase">
-                        <div class="phase-header">🌗 4. Telophase</div>
+                        <div class="phase-header">
+                            <div class="phase-title">🌗 4. Telophase</div>
+                            <div class="phase-image">
+                                <svg width="120" height="80" viewBox="0 0 120 80">
+                                    <circle cx="60" cy="40" r="35" fill="#f3e5f5" stroke="#9C27B0" stroke-width="2"/>
+                                    <g stroke="#7B1FA2" stroke-width="2" fill="none">
+                                        <circle cx="30" cy="40" r="15" fill="none"/>
+                                        <circle cx="90" cy="40" r="15" fill="none"/>
+                                        <line x1="20" y1="30" x2="25" y2="35"/>
+                                        <line x1="20" y1="45" x2="25" y2="50"/>
+                                        <line x1="95" y1="30" x2="100" y2="35"/>
+                                        <line x1="95" y1="45" x2="100" y2="50"/>
+                                    </g>
+                                    <text x="60" y="70" text-anchor="middle" font-size="8" fill="#666">Two nuclei forming</text>
+                                </svg>
+                            </div>
+                        </div>
                         <div class="phase-items" id="telophase-items"></div>
                     </div>
 
                     <div class="phase-card" data-phase="cytokinesis">
-                        <div class="phase-header">💧 5. Cytokinesis</div>
+                        <div class="phase-header">
+                            <div class="phase-title">💧 5. Cytokinesis</div>
+                            <div class="phase-image">
+                                <svg width="120" height="80" viewBox="0 0 120 80">
+                                    <ellipse cx="30" cy="40" rx="20" ry="35" fill="#e1f5fe" stroke="#03A9F4" stroke-width="2"/>
+                                    <ellipse cx="90" cy="40" rx="20" ry="35" fill="#e1f5fe" stroke="#03A9F4" stroke-width="2"/>
+                                    <line x1="50" y1="5" x2="50" y2="75" stroke="#03A9F4" stroke-width="3"/>
+                                    <circle cx="30" cy="40" r="8" fill="none" stroke="#1976D2" stroke-width="1"/>
+                                    <circle cx="90" cy="40" r="8" fill="none" stroke="#1976D2" stroke-width="1"/>
+                                    <text x="60" y="70" text-anchor="middle" font-size="8" fill="#666">Two daughter cells</text>
+                                </svg>
+                            </div>
+                        </div>
                         <div class="phase-items" id="cytokinesis-items"></div>
                     </div>
                 </div>

@@ -62,6 +62,9 @@ const PREDEFINED_TEACHERS = process.env.PREDEFINED_TEACHERS
   ? process.env.PREDEFINED_TEACHERS.split(',').map(name => name.trim())
   : ['Teacher1', 'Teacher2', 'Teacher3', 'Teacher4', 'Teacher5', 'Teacher6', 'Teacher7']; // Fallback for development
 
+// Log teacher names for debugging (remove in production)
+console.log('Loaded teachers:', PREDEFINED_TEACHERS);
+
 // Fuzzy matching function for teacher names
 function findClosestTeacher(inputTeacher) {
   const input = inputTeacher.toLowerCase().trim();
