@@ -637,7 +637,17 @@
                             if (attempt.incorrectAnswers.length > 0) {
                                 html += '<div class="incorrect-list">Incorrect answers:</div>';
                                 attempt.incorrectAnswers.forEach(incorrect => {
-                                    html += `<span class="incorrect-item">${incorrect}</span> `;
+                                    // Check if it's the new format with placement info
+                                    if (typeof incorrect === 'object' && incorrect.item) {
+                                        html += `<div class="incorrect-item" style="margin: 5px 0; padding: 8px; background: #ffebee; border-radius: 4px;">
+                                            <strong>Item:</strong> ${incorrect.item}<br>
+                                            <strong>Correct Phase:</strong> ${incorrect.correctPhase}<br>
+                                            <strong>Student Placed In:</strong> ${incorrect.incorrectPhase}
+                                        </div>`;
+                                    } else {
+                                        // Fallback for old format
+                                        html += `<span class="incorrect-item">${incorrect}</span> `;
+                                    }
                                 });
                             }
                             
@@ -767,7 +777,13 @@
                     } else {
                         item.classList.remove('correct');
                         item.classList.add('incorrect');
-                        incorrectAnswers.push(item.textContent);
+                        // Track both the incorrect item AND which phase it was placed in
+                        const incorrectPlacement = {
+                            item: item.textContent,
+                            correctPhase: item.dataset.phase,
+                            incorrectPhase: phase
+                        };
+                        incorrectAnswers.push(incorrectPlacement);
                         // Return incorrect items to pool after animation
                         setTimeout(() => {
                             item.classList.remove('incorrect');
