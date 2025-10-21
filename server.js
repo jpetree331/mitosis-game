@@ -57,6 +57,74 @@ async function initDatabase() {
 
 // Routes
 
+// Pre-defined teacher names
+const PREDEFINED_TEACHERS = ['Darius', 'Petree', 'Bolden', 'Wastani', 'Simmons', 'Steiner', 'Askew'];
+
+// Fuzzy matching function for teacher names
+function findClosestTeacher(inputTeacher) {
+  const input = inputTeacher.toLowerCase().trim();
+  
+  // First try exact match (case insensitive)
+  for (const teacher of PREDEFINED_TEACHERS) {
+    if (teacher.toLowerCase() === input) {
+      return teacher;
+    }
+  }
+  
+  // Then try fuzzy matching
+  let bestMatch = null;
+  let bestScore = 0;
+  
+  for (const teacher of PREDEFINED_TEACHERS) {
+    const score = calculateSimilarity(input, teacher.toLowerCase());
+    if (score > bestScore && score > 0.6) { // Minimum 60% similarity
+      bestScore = score;
+      bestMatch = teacher;
+    }
+  }
+  
+  return bestMatch || inputTeacher; // Return original if no good match
+}
+
+// Simple similarity calculation (Levenshtein distance based)
+function calculateSimilarity(str1, str2) {
+  const longer = str1.length > str2.length ? str1 : str2;
+  const shorter = str1.length > str2.length ? str2 : str1;
+  
+  if (longer.length === 0) return 1.0;
+  
+  const distance = levenshteinDistance(longer, shorter);
+  return (longer.length - distance) / longer.length;
+}
+
+function levenshteinDistance(str1, str2) {
+  const matrix = [];
+  
+  for (let i = 0; i <= str2.length; i++) {
+    matrix[i] = [i];
+  }
+  
+  for (let j = 0; j <= str1.length; j++) {
+    matrix[0][j] = j;
+  }
+  
+  for (let i = 1; i <= str2.length; i++) {
+    for (let j = 1; j <= str1.length; j++) {
+      if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
+        matrix[i][j] = matrix[i - 1][j - 1];
+      } else {
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j - 1] + 1,
+          matrix[i][j - 1] + 1,
+          matrix[i - 1][j] + 1
+        );
+      }
+    }
+  }
+  
+  return matrix[str2.length][str1.length];
+}
+
 // Get or create student
 app.post('/api/student', async (req, res) => {
   try {
@@ -66,10 +134,13 @@ app.post('/api/student', async (req, res) => {
       return res.status(400).json({ error: 'First name and teacher name are required' });
     }
 
-    // Check if student already exists
+    // Find the closest teacher name using fuzzy matching
+    const matchedTeacher = findClosestTeacher(teacherName);
+    
+    // Check if student already exists (case insensitive)
     const existingStudent = await client.execute({
-      sql: 'SELECT * FROM students WHERE first_name = ? AND teacher_name = ?',
-      args: [firstName, teacherName]
+      sql: 'SELECT * FROM students WHERE first_name = ? AND LOWER(teacher_name) = LOWER(?)',
+      args: [firstName, matchedTeacher]
     });
 
     if (existingStudent.rows.length > 0) {
@@ -85,16 +156,16 @@ app.post('/api/student', async (req, res) => {
       });
     }
 
-    // Create new student
+    // Create new student with matched teacher name
     const result = await client.execute({
       sql: 'INSERT INTO students (first_name, teacher_name) VALUES (?, ?)',
-      args: [firstName, teacherName]
+      args: [firstName, matchedTeacher]
     });
 
     const newStudent = {
       id: Number(result.lastInsertRowid),
       first_name: firstName,
-      teacher_name: teacherName,
+      teacher_name: matchedTeacher,
       created_at: new Date().toISOString()
     };
 
@@ -203,6 +274,36 @@ app.post('/api/admin/data', async (req, res) => {
     });
   } catch (error) {
     console.error('Error fetching admin data:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Clear teacher data endpoint
+app.delete('/api/teacher/:teacherName', async (req, res) => {
+  try {
+    const { teacherName } = req.params;
+    
+    if (!teacherName) {
+      return res.status(400).json({ error: 'Teacher name is required' });
+    }
+
+    // Delete all students and their attempts for this teacher
+    await client.execute({
+      sql: 'DELETE FROM game_attempts WHERE student_id IN (SELECT id FROM students WHERE teacher_name = ?)',
+      args: [teacherName]
+    });
+
+    await client.execute({
+      sql: 'DELETE FROM students WHERE teacher_name = ?',
+      args: [teacherName]
+    });
+
+    res.json({ 
+      success: true, 
+      message: `All data for teacher "${teacherName}" has been cleared` 
+    });
+  } catch (error) {
+    console.error('Error clearing teacher data:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

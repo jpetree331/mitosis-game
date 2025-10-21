@@ -613,7 +613,15 @@
             // Display students grouped by teacher
             let html = '';
             Object.keys(studentsByTeacher).sort().forEach(teacherName => {
-                html += `<h3 style="color: #667eea; margin: 20px 0 10px 0;">Teacher: ${teacherName}</h3>`;
+                html += `
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin: 20px 0 10px 0;">
+                        <h3 style="color: #667eea; margin: 0;">Teacher: ${teacherName}</h3>
+                        <button class="btn btn-secondary" onclick="clearTeacherData('${teacherName}')" 
+                                style="padding: 8px 16px; font-size: 0.9em; margin: 0;">
+                            🗑️ Clear Data
+                        </button>
+                    </div>
+                `;
                 
                 studentsByTeacher[teacherName].forEach(student => {
                     html += `
@@ -660,6 +668,35 @@
             });
 
             document.getElementById('studentData').innerHTML = html;
+        }
+
+        // Clear teacher data function
+        async function clearTeacherData(teacherName) {
+            if (!confirm(`Are you sure you want to delete ALL data for teacher "${teacherName}"? This action cannot be undone.`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/teacher/${encodeURIComponent(teacherName)}`, {
+                    method: 'DELETE'
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    alert(`Successfully cleared all data for teacher "${teacherName}"`);
+                    // Refresh the admin dashboard
+                    const adminCode = document.getElementById('adminCode').value;
+                    if (adminCode) {
+                        document.getElementById('adminLoginForm').dispatchEvent(new Event('submit'));
+                    }
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error clearing teacher data:', error);
+                alert('Error connecting to server. Please try again.');
+            }
         }
 
         // Game functionality (existing code with database integration)
