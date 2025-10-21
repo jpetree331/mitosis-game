@@ -68,8 +68,14 @@ app.post('/api/student', async (req, res) => {
     });
 
     if (existingStudent.rows.length > 0) {
+      const student = existingStudent.rows[0];
       return res.json({ 
-        student: existingStudent.rows[0],
+        student: {
+          id: Number(student.id),
+          first_name: student.first_name,
+          teacher_name: student.teacher_name,
+          created_at: student.created_at
+        },
         isNew: false 
       });
     }
@@ -81,7 +87,7 @@ app.post('/api/student', async (req, res) => {
     });
 
     const newStudent = {
-      id: result.lastInsertRowid,
+      id: Number(result.lastInsertRowid),
       first_name: firstName,
       teacher_name: teacherName,
       created_at: new Date().toISOString()
@@ -159,7 +165,7 @@ app.post('/api/admin/data', async (req, res) => {
     const studentsMap = new Map();
     
     studentsResult.rows.forEach(row => {
-      const studentId = row.id;
+      const studentId = Number(row.id);
       
       if (!studentsMap.has(studentId)) {
         studentsMap.set(studentId, {
@@ -173,9 +179,9 @@ app.post('/api/admin/data', async (req, res) => {
 
       if (row.attempt_number) {
         studentsMap.get(studentId).attempts.push({
-          attemptNumber: row.attempt_number,
-          totalQuestions: row.total_questions,
-          correctAnswers: row.correct_answers,
+          attemptNumber: Number(row.attempt_number),
+          totalQuestions: Number(row.total_questions),
+          correctAnswers: Number(row.correct_answers),
           incorrectAnswers: JSON.parse(row.incorrect_answers || '[]'),
           attemptCreatedAt: row.attempt_created_at
         });
