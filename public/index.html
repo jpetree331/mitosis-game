@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mitosis Matching Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        /* Login Screen Styles */
+        .login-screen {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 80vh;
+        }
+
+        .login-form {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-form h2 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 30px;
+            font-size: 2em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1em;
+            border-radius: 30px;
+            cursor: pointer;
+            width: 100%;
+            margin: 10px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(0,0,0,0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+        }
+
+        /* Game Screen Styles */
+        .game-screen {
+            display: none;
+        }
+
+        .game-screen.active {
+            display: block;
+        }
+
+        .student-info {
+            background: rgba(255,255,255,0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            color: white;
+            text-align: center;
+        }
+
+        .instructions {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+            background: rgba(255,255,255,0.2);
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .game-area {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .phases-column {
+            flex: 1;
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .items-column {
+            flex: 1;
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .column-title {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            color: #667eea;
+            text-align: center;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .phase-card {
+            margin-bottom: 25px;
+            border: 3px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 15px;
+            background: #f9f9f9;
+            min-height: 120px;
+            transition: all 0.3s ease;
+        }
+
+        .phase-card.drag-over {
+            background: #e3f2fd;
+            border-color: #2196F3;
+            transform: scale(1.02);
+        }
+
+        .phase-header {
+            font-size: 1.3em;
+            margin-bottom: 10px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .phase-items {
+            min-height: 60px;
+        }
+
+        .draggable-item {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 15px;
+            margin: 8px 0;
+            border-radius: 8px;
+            cursor: move;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+            user-select: none;
+        }
+
+        .draggable-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 12px rgba(0,0,0,0.3);
+        }
+
+        .draggable-item.dragging {
+            opacity: 0.5;
+        }
+
+        .draggable-item.correct {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            cursor: default;
+        }
+
+        .draggable-item.incorrect {
+            background: linear-gradient(135deg, #f44336 0%, #da190b 100%);
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .controls {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .feedback {
+            text-align: center;
+            font-size: 1.3em;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .feedback.show {
+            display: block;
+        }
+
+        .feedback.success {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .feedback.partial {
+            background: #ff9800;
+            color: white;
+        }
+
+        /* Admin Dashboard Styles */
+        .admin-screen {
+            display: none;
+        }
+
+        .admin-screen.active {
+            display: block;
+        }
+
+        .admin-header {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .admin-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .student-data {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .student-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: #f9f9f9;
+        }
+
+        .student-header {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .attempt-item {
+            background: white;
+            border-radius: 8px;
+            padding: 10px;
+            margin: 5px 0;
+            border-left: 4px solid #667eea;
+        }
+
+        .attempt-header {
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .incorrect-list {
+            margin-top: 5px;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .incorrect-item {
+            background: #ffebee;
+            padding: 3px 8px;
+            border-radius: 4px;
+            margin: 2px 0;
+            display: inline-block;
+        }
+
+        @media (max-width: 968px) {
+            .game-area {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Login Screen -->
+        <div class="login-screen" id="loginScreen">
+            <div class="login-form">
+                <h2>🧬 Mitosis Game Login 🧬</h2>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="firstName">First Name:</label>
+                        <input type="text" id="firstName" name="firstName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="teacherName">Teacher Name:</label>
+                        <input type="text" id="teacherName" name="teacherName" required>
+                    </div>
+                    <button type="submit" class="btn">Start Game</button>
+                    <button type="button" class="btn btn-secondary" onclick="showAdminLogin()">Data Dashboard</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Admin Login Screen -->
+        <div class="login-screen" id="adminLoginScreen" style="display: none;">
+            <div class="login-form">
+                <h2>🔐 Admin Access 🔐</h2>
+                <form id="adminLoginForm">
+                    <div class="form-group">
+                        <label for="adminCode">Admin Code:</label>
+                        <input type="password" id="adminCode" name="adminCode" required>
+                    </div>
+                    <button type="submit" class="btn">Access Dashboard</button>
+                    <button type="button" class="btn btn-secondary" onclick="showStudentLogin()">Back to Game</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Game Screen -->
+        <div class="game-screen" id="gameScreen">
+            <h1>🧬 Mitosis Matching Game 🧬</h1>
+            <div class="student-info" id="studentInfo"></div>
+            <div class="instructions">
+                Drag and drop each description to match it with the correct phase of mitosis!
+            </div>
+
+            <div class="controls">
+                <button class="btn" onclick="checkAnswers()">Check Answers</button>
+                <button class="btn" onclick="resetGame()">Reset Game</button>
+                <button class="btn btn-secondary" onclick="logout()">Logout</button>
+            </div>
+
+            <div class="game-area">
+                <div class="phases-column">
+                    <h2 class="column-title">Phases of Mitosis</h2>
+
+                    <div class="phase-card" data-phase="prophase">
+                        <div class="phase-header">🌱 1. Prophase</div>
+                        <div class="phase-items" id="prophase-items"></div>
+                    </div>
+
+                    <div class="phase-card" data-phase="metaphase">
+                        <div class="phase-header">⚙️ 2. Metaphase</div>
+                        <div class="phase-items" id="metaphase-items"></div>
+                    </div>
+
+                    <div class="phase-card" data-phase="anaphase">
+                        <div class="phase-header">✂️ 3. Anaphase</div>
+                        <div class="phase-items" id="anaphase-items"></div>
+                    </div>
+
+                    <div class="phase-card" data-phase="telophase">
+                        <div class="phase-header">🌗 4. Telophase</div>
+                        <div class="phase-items" id="telophase-items"></div>
+                    </div>
+
+                    <div class="phase-card" data-phase="cytokinesis">
+                        <div class="phase-header">💧 5. Cytokinesis</div>
+                        <div class="phase-items" id="cytokinesis-items"></div>
+                    </div>
+                </div>
+
+                <div class="items-column">
+                    <h2 class="column-title">Descriptions (Drag Me!)</h2>
+                    <div id="items-pool"></div>
+                </div>
+            </div>
+
+            <div class="feedback" id="feedback"></div>
+        </div>
+
+        <!-- Admin Dashboard -->
+        <div class="admin-screen" id="adminScreen">
+            <div class="admin-header">
+                <h1>📊 Student Data Dashboard</h1>
+                <button class="btn btn-secondary" onclick="logout()">Back to Login</button>
+            </div>
+
+            <div class="admin-stats" id="adminStats">
+                <!-- Stats will be populated here -->
+            </div>
+
+            <div class="student-data" id="studentData">
+                <!-- Student data will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentStudent = null;
+        let currentItems = [];
+        let draggedElement = null;
+
+        // Define all the items with their correct phases
+        const items = [
+            { text: "Chromosomes thicken and become visible under a microscope.", phase: "prophase" },
+            { text: "The nuclear membrane breaks down.", phase: "prophase" },
+            { text: "Spindle fibers begin to form from centrioles at opposite poles of the cell.", phase: "prophase" },
+            { text: "Chromosomes line up along the middle (equator) of the cell.", phase: "metaphase" },
+            { text: "Spindle fibers attach to the centromeres of each chromosome.", phase: "metaphase" },
+            { text: "Sister chromatids are pulled apart to opposite sides of the cell.", phase: "anaphase" },
+            { text: "Each chromatid is now considered its own chromosome.", phase: "anaphase" },
+            { text: "Two new nuclei begin to form, one at each end.", phase: "telophase" },
+            { text: "Chromosomes uncoil back into chromatin.", phase: "telophase" },
+            { text: "The nuclear membrane reappears.", phase: "telophase" },
+            { text: "The cytoplasm divides, forming two identical daughter cells.", phase: "cytokinesis" },
+            { text: "In animal cells, the membrane pinches in; in plant cells, a new cell plate forms.", phase: "cytokinesis" }
+        ];
+
+        // Login functionality
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const firstName = document.getElementById('firstName').value;
+            const teacherName = document.getElementById('teacherName').value;
+
+            try {
+                const response = await fetch('/api/student', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ firstName, teacherName })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    currentStudent = data.student;
+                    showGameScreen();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                alert('Error connecting to server. Please try again.');
+            }
+        });
+
+        // Admin login functionality
+        document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const adminCode = document.getElementById('adminCode').value;
+
+            try {
+                const response = await fetch('/api/admin/data', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ adminCode })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showAdminDashboard(data);
+                } else {
+                    alert('Invalid admin code');
+                }
+            } catch (error) {
+                console.error('Admin login error:', error);
+                alert('Error connecting to server. Please try again.');
+            }
+        });
+
+        // Screen navigation functions
+        function showStudentLogin() {
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('adminLoginScreen').style.display = 'none';
+            document.getElementById('gameScreen').classList.remove('active');
+            document.getElementById('adminScreen').classList.remove('active');
+        }
+
+        function showAdminLogin() {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('adminLoginScreen').style.display = 'flex';
+            document.getElementById('gameScreen').classList.remove('active');
+            document.getElementById('adminScreen').classList.remove('active');
+        }
+
+        function showGameScreen() {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('adminLoginScreen').style.display = 'none';
+            document.getElementById('gameScreen').classList.add('active');
+            document.getElementById('adminScreen').classList.remove('active');
+            
+            // Update student info display
+            document.getElementById('studentInfo').innerHTML = 
+                `Welcome, ${currentStudent.first_name}! Teacher: ${currentStudent.teacher_name}`;
+            
+            // Initialize the game
+            initGame();
+        }
+
+        function showAdminDashboard(data) {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('adminLoginScreen').style.display = 'none';
+            document.getElementById('gameScreen').classList.remove('active');
+            document.getElementById('adminScreen').classList.add('active');
+            
+            populateAdminDashboard(data);
+        }
+
+        function logout() {
+            currentStudent = null;
+            showStudentLogin();
+        }
+
+        // Admin dashboard population
+        function populateAdminDashboard(data) {
+            // Update stats
+            document.getElementById('adminStats').innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-number">${data.totalStudents}</div>
+                    <div>Total Students</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${data.totalAttempts}</div>
+                    <div>Total Attempts</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${data.students.filter(s => s.attempts.length > 0).length}</div>
+                    <div>Students with Attempts</div>
+                </div>
+            `;
+
+            // Group students by teacher
+            const studentsByTeacher = {};
+            data.students.forEach(student => {
+                if (!studentsByTeacher[student.teacherName]) {
+                    studentsByTeacher[student.teacherName] = [];
+                }
+                studentsByTeacher[student.teacherName].push(student);
+            });
+
+            // Display students grouped by teacher
+            let html = '';
+            Object.keys(studentsByTeacher).sort().forEach(teacherName => {
+                html += `<h3 style="color: #667eea; margin: 20px 0 10px 0;">Teacher: ${teacherName}</h3>`;
+                
+                studentsByTeacher[teacherName].forEach(student => {
+                    html += `
+                        <div class="student-card">
+                            <div class="student-header">
+                                ${student.firstName} (${student.attempts.length} attempt${student.attempts.length !== 1 ? 's' : ''})
+                            </div>
+                    `;
+                    
+                    if (student.attempts.length === 0) {
+                        html += '<div style="color: #999; font-style: italic;">No attempts yet</div>';
+                    } else {
+                        student.attempts.forEach((attempt, index) => {
+                            html += `
+                                <div class="attempt-item">
+                                    <div class="attempt-header">
+                                        Attempt ${attempt.attemptNumber}: ${attempt.correctAnswers}/${attempt.totalQuestions} correct
+                                    </div>
+                            `;
+                            
+                            if (attempt.incorrectAnswers.length > 0) {
+                                html += '<div class="incorrect-list">Incorrect answers:</div>';
+                                attempt.incorrectAnswers.forEach(incorrect => {
+                                    html += `<span class="incorrect-item">${incorrect}</span> `;
+                                });
+                            }
+                            
+                            html += '</div>';
+                        });
+                    }
+                    
+                    html += '</div>';
+                });
+            });
+
+            document.getElementById('studentData').innerHTML = html;
+        }
+
+        // Game functionality (existing code with database integration)
+        function initGame() {
+            // Shuffle items
+            currentItems = [...items].sort(() => Math.random() - 0.5);
+
+            // Clear all areas
+            document.getElementById('items-pool').innerHTML = '';
+            document.querySelectorAll('.phase-items').forEach(el => el.innerHTML = '');
+
+            // Create draggable items
+            currentItems.forEach((item, index) => {
+                const itemDiv = createDraggableItem(item.text, item.phase, index);
+                document.getElementById('items-pool').appendChild(itemDiv);
+            });
+
+            // Hide feedback
+            document.getElementById('feedback').classList.remove('show');
+        }
+
+        function createDraggableItem(text, phase, id) {
+            const div = document.createElement('div');
+            div.className = 'draggable-item';
+            div.draggable = true;
+            div.textContent = text;
+            div.dataset.phase = phase;
+            div.dataset.id = id;
+
+            div.addEventListener('dragstart', handleDragStart);
+            div.addEventListener('dragend', handleDragEnd);
+
+            return div;
+        }
+
+        function handleDragStart(e) {
+            draggedElement = this;
+            this.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/html', this.innerHTML);
+        }
+
+        function handleDragEnd(e) {
+            this.classList.remove('dragging');
+        }
+
+        // Set up drop zones
+        document.querySelectorAll('.phase-card, #items-pool').forEach(zone => {
+            zone.addEventListener('dragover', handleDragOver);
+            zone.addEventListener('drop', handleDrop);
+            zone.addEventListener('dragleave', handleDragLeave);
+        });
+
+        function handleDragOver(e) {
+            if (e.preventDefault) {
+                e.preventDefault();
+            }
+            e.dataTransfer.dropEffect = 'move';
+
+            if (this.classList.contains('phase-card')) {
+                this.classList.add('drag-over');
+            }
+            return false;
+        }
+
+        function handleDragLeave(e) {
+            if (this.classList.contains('phase-card')) {
+                this.classList.remove('drag-over');
+            }
+        }
+
+        function handleDrop(e) {
+            if (e.stopPropagation) {
+                e.stopPropagation();
+            }
+
+            this.classList.remove('drag-over');
+
+            if (draggedElement) {
+                // Remove any previous incorrect/correct classes
+                draggedElement.classList.remove('incorrect', 'correct');
+
+                // Determine the target container
+                let targetContainer;
+                if (this.classList.contains('phase-card')) {
+                    targetContainer = this.querySelector('.phase-items');
+                } else if (this.id === 'items-pool') {
+                    targetContainer = this;
+                } else {
+                    targetContainer = this;
+                }
+
+                targetContainer.appendChild(draggedElement);
+            }
+
+            return false;
+        }
+
+        async function checkAnswers() {
+            let correct = 0;
+            let total = items.length;
+            let incorrectAnswers = [];
+
+            // Check each phase
+            document.querySelectorAll('.phase-card').forEach(card => {
+                const phase = card.dataset.phase;
+                const itemsInPhase = card.querySelectorAll('.draggable-item');
+
+                itemsInPhase.forEach(item => {
+                    if (item.dataset.phase === phase) {
+                        item.classList.remove('incorrect');
+                        item.classList.add('correct');
+                        item.draggable = false;
+                        correct++;
+                    } else {
+                        item.classList.remove('correct');
+                        item.classList.add('incorrect');
+                        incorrectAnswers.push(item.textContent);
+                        // Return incorrect items to pool after animation
+                        setTimeout(() => {
+                            item.classList.remove('incorrect');
+                            document.getElementById('items-pool').appendChild(item);
+                        }, 1000);
+                    }
+                });
+            });
+
+            // Save attempt to database
+            if (currentStudent) {
+                try {
+                    await fetch('/api/game-attempt', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            studentId: currentStudent.id,
+                            correctAnswers: correct,
+                            incorrectAnswers: incorrectAnswers,
+                            totalQuestions: total
+                        })
+                    });
+                } catch (error) {
+                    console.error('Error saving attempt:', error);
+                }
+            }
+
+            // Show feedback
+            const feedback = document.getElementById('feedback');
+            feedback.classList.add('show');
+
+            if (correct === total) {
+                feedback.className = 'feedback show success';
+                feedback.innerHTML = `🎉 Perfect! You matched all ${total} descriptions correctly! 🎉<br>You have mastered the phases of mitosis!`;
+            } else {
+                feedback.className = 'feedback show partial';
+                feedback.innerHTML = `You got ${correct} out of ${total} correct. Keep trying!`;
+            }
+        }
+
+        function resetGame() {
+            initGame();
+        }
+    </script>
+</body>
+</html>
