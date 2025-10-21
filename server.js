@@ -57,8 +57,10 @@ async function initDatabase() {
 
 // Routes
 
-// Pre-defined teacher names
-const PREDEFINED_TEACHERS = ['Darius', 'Petree', 'Bolden', 'Wastani', 'Simmons', 'Steiner', 'Askew'];
+// Pre-defined teacher names from environment variable (private)
+const PREDEFINED_TEACHERS = process.env.PREDEFINED_TEACHERS 
+  ? process.env.PREDEFINED_TEACHERS.split(',').map(name => name.trim())
+  : ['Teacher1', 'Teacher2', 'Teacher3', 'Teacher4', 'Teacher5', 'Teacher6', 'Teacher7']; // Fallback for development
 
 // Fuzzy matching function for teacher names
 function findClosestTeacher(inputTeacher) {
