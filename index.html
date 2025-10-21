@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mitosis Matching Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .instructions {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+            background: rgba(255,255,255,0.2);
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .game-area {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .phases-column {
+            flex: 1;
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .items-column {
+            flex: 1;
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .column-title {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            color: #667eea;
+            text-align: center;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .phase-card {
+            margin-bottom: 25px;
+            border: 3px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 15px;
+            background: #f9f9f9;
+            min-height: 120px;
+            transition: all 0.3s ease;
+        }
+
+        .phase-card.drag-over {
+            background: #e3f2fd;
+            border-color: #2196F3;
+            transform: scale(1.02);
+        }
+
+        .phase-header {
+            font-size: 1.3em;
+            margin-bottom: 10px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .phase-items {
+            min-height: 60px;
+        }
+
+        .draggable-item {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 15px;
+            margin: 8px 0;
+            border-radius: 8px;
+            cursor: move;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+            user-select: none;
+        }
+
+        .draggable-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 12px rgba(0,0,0,0.3);
+        }
+
+        .draggable-item.dragging {
+            opacity: 0.5;
+        }
+
+        .draggable-item.correct {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            cursor: default;
+        }
+
+        .draggable-item.incorrect {
+            background: linear-gradient(135deg, #f44336 0%, #da190b 100%);
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .controls {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1em;
+            border-radius: 30px;
+            cursor: pointer;
+            margin: 0 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(0,0,0,0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .feedback {
+            text-align: center;
+            font-size: 1.3em;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .feedback.show {
+            display: block;
+        }
+
+        .feedback.success {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .feedback.partial {
+            background: #ff9800;
+            color: white;
+        }
+
+        @media (max-width: 968px) {
+            .game-area {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧬 Mitosis Matching Game 🧬</h1>
+        <div class="instructions">
+            Drag and drop each description to match it with the correct phase of mitosis!
+        </div>
+
+        <div class="controls">
+            <button class="btn" onclick="checkAnswers()">Check Answers</button>
+            <button class="btn" onclick="resetGame()">Reset Game</button>
+        </div>
+
+        <div class="game-area">
+            <div class="phases-column">
+                <h2 class="column-title">Phases of Mitosis</h2>
+
+                <div class="phase-card" data-phase="prophase">
+                    <div class="phase-header">🌱 1. Prophase</div>
+                    <div class="phase-items" id="prophase-items"></div>
+                </div>
+
+                <div class="phase-card" data-phase="metaphase">
+                    <div class="phase-header">⚙️ 2. Metaphase</div>
+                    <div class="phase-items" id="metaphase-items"></div>
+                </div>
+
+                <div class="phase-card" data-phase="anaphase">
+                    <div class="phase-header">✂️ 3. Anaphase</div>
+                    <div class="phase-items" id="anaphase-items"></div>
+                </div>
+
+                <div class="phase-card" data-phase="telophase">
+                    <div class="phase-header">🌗 4. Telophase</div>
+                    <div class="phase-items" id="telophase-items"></div>
+                </div>
+
+                <div class="phase-card" data-phase="cytokinesis">
+                    <div class="phase-header">💧 5. Cytokinesis</div>
+                    <div class="phase-items" id="cytokinesis-items"></div>
+                </div>
+            </div>
+
+            <div class="items-column">
+                <h2 class="column-title">Descriptions (Drag Me!)</h2>
+                <div id="items-pool"></div>
+            </div>
+        </div>
+
+        <div class="feedback" id="feedback"></div>
+    </div>
+
+    <script>
+        // Define all the items with their correct phases
+        const items = [
+            { text: "Chromosomes thicken and become visible under a microscope.", phase: "prophase" },
+            { text: "The nuclear membrane breaks down.", phase: "prophase" },
+            { text: "Spindle fibers begin to form from centrioles at opposite poles of the cell.", phase: "prophase" },
+            { text: "Chromosomes line up along the middle (equator) of the cell.", phase: "metaphase" },
+            { text: "Spindle fibers attach to the centromeres of each chromosome.", phase: "metaphase" },
+            { text: "Sister chromatids are pulled apart to opposite sides of the cell.", phase: "anaphase" },
+            { text: "Each chromatid is now considered its own chromosome.", phase: "anaphase" },
+            { text: "Two new nuclei begin to form, one at each end.", phase: "telophase" },
+            { text: "Chromosomes uncoil back into chromatin.", phase: "telophase" },
+            { text: "The nuclear membrane reappears.", phase: "telophase" },
+            { text: "The cytoplasm divides, forming two identical daughter cells.", phase: "cytokinesis" },
+            { text: "In animal cells, the membrane pinches in; in plant cells, a new cell plate forms.", phase: "cytokinesis" }
+        ];
+
+        let currentItems = [];
+
+        // Initialize the game
+        function initGame() {
+            // Shuffle items
+            currentItems = [...items].sort(() => Math.random() - 0.5);
+
+            // Clear all areas
+            document.getElementById('items-pool').innerHTML = '';
+            document.querySelectorAll('.phase-items').forEach(el => el.innerHTML = '');
+
+            // Create draggable items
+            currentItems.forEach((item, index) => {
+                const itemDiv = createDraggableItem(item.text, item.phase, index);
+                document.getElementById('items-pool').appendChild(itemDiv);
+            });
+
+            // Hide feedback
+            document.getElementById('feedback').classList.remove('show');
+        }
+
+        function createDraggableItem(text, phase, id) {
+            const div = document.createElement('div');
+            div.className = 'draggable-item';
+            div.draggable = true;
+            div.textContent = text;
+            div.dataset.phase = phase;
+            div.dataset.id = id;
+
+            div.addEventListener('dragstart', handleDragStart);
+            div.addEventListener('dragend', handleDragEnd);
+
+            return div;
+        }
+
+        let draggedElement = null;
+
+        function handleDragStart(e) {
+            draggedElement = this;
+            this.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/html', this.innerHTML);
+        }
+
+        function handleDragEnd(e) {
+            this.classList.remove('dragging');
+        }
+
+        // Set up drop zones
+        document.querySelectorAll('.phase-card, #items-pool').forEach(zone => {
+            zone.addEventListener('dragover', handleDragOver);
+            zone.addEventListener('drop', handleDrop);
+            zone.addEventListener('dragleave', handleDragLeave);
+        });
+
+        function handleDragOver(e) {
+            if (e.preventDefault) {
+                e.preventDefault();
+            }
+            e.dataTransfer.dropEffect = 'move';
+
+            if (this.classList.contains('phase-card')) {
+                this.classList.add('drag-over');
+            }
+            return false;
+        }
+
+        function handleDragLeave(e) {
+            if (this.classList.contains('phase-card')) {
+                this.classList.remove('drag-over');
+            }
+        }
+
+        function handleDrop(e) {
+            if (e.stopPropagation) {
+                e.stopPropagation();
+            }
+
+            this.classList.remove('drag-over');
+
+            if (draggedElement) {
+                // Remove any previous incorrect/correct classes
+                draggedElement.classList.remove('incorrect', 'correct');
+
+                // Determine the target container
+                let targetContainer;
+                if (this.classList.contains('phase-card')) {
+                    targetContainer = this.querySelector('.phase-items');
+                } else if (this.id === 'items-pool') {
+                    targetContainer = this;
+                } else {
+                    targetContainer = this;
+                }
+
+                targetContainer.appendChild(draggedElement);
+            }
+
+            return false;
+        }
+
+        function checkAnswers() {
+            let correct = 0;
+            let total = items.length;
+
+            // Check each phase
+            document.querySelectorAll('.phase-card').forEach(card => {
+                const phase = card.dataset.phase;
+                const itemsInPhase = card.querySelectorAll('.draggable-item');
+
+                itemsInPhase.forEach(item => {
+                    if (item.dataset.phase === phase) {
+                        item.classList.remove('incorrect');
+                        item.classList.add('correct');
+                        item.draggable = false;
+                        correct++;
+                    } else {
+                        item.classList.remove('correct');
+                        item.classList.add('incorrect');
+                        // Return incorrect items to pool after animation
+                        setTimeout(() => {
+                            item.classList.remove('incorrect');
+                            document.getElementById('items-pool').appendChild(item);
+                        }, 1000);
+                    }
+                });
+            });
+
+            // Show feedback
+            const feedback = document.getElementById('feedback');
+            feedback.classList.add('show');
+
+            if (correct === total) {
+                feedback.className = 'feedback show success';
+                feedback.innerHTML = `🎉 Perfect! You matched all ${total} descriptions correctly! 🎉<br>You have mastered the phases of mitosis!`;
+            } else {
+                feedback.className = 'feedback show partial';
+                feedback.innerHTML = `You got ${correct} out of ${total} correct. Keep trying!`;
+            }
+        }
+
+        function resetGame() {
+            initGame();
+        }
+
+        // Start the game when page loads
+        initGame();
+    </script>
+</body>
+</html>
