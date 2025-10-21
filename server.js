@@ -3,6 +3,11 @@ const cors = require('cors');
 const { createClient } = require('@libsql/client');
 require('dotenv').config();
 
+// Fix BigInt serialization
+BigInt.prototype.toJSON = function() {
+  return Number(this);
+};
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -114,7 +119,7 @@ app.post('/api/game-attempt', async (req, res) => {
       args: [studentId]
     });
     
-    const attemptNumber = (attemptResult.rows[0].attempt_count || 0) + 1;
+    const attemptNumber = Number(attemptResult.rows[0].attempt_count || 0) + 1;
 
     // Save the attempt
     await client.execute({
