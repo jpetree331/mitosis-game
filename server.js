@@ -14,7 +14,7 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static('public'));
+app.use(express.static('.'));
 
 // Turso database connection
 const client = createClient({
@@ -315,7 +315,7 @@ app.delete('/api/teacher/:teacherName', async (req, res) => {
 
 // Serve the main game page
 app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/public/index.html');
+  res.sendFile(__dirname + '/index.html');
 });
 
 // Initialize database and start server
