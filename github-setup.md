@@ -136,3 +136,5 @@ mitosis-game-claude/
 2. **Deploy to Railway** (see `railway-deployment.md`)
 3. **Test the application** with database integration
 4. **Share with students and teachers!**
+
+

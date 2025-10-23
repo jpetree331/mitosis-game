@@ -173,3 +173,5 @@ Create `netlify-frontend/_redirects` file:
 3. **Add custom domain**
 
 This setup gives you the best of both worlds: fast static hosting with powerful backend capabilities!
+
+
